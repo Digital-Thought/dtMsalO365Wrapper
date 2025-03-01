@@ -1,0 +1,5 @@
+include src/dtMsalO365Wrapper/_resources/*
+include src/dtMsalO365Wrapper/*.dat
+include src/dtMsalO365Wrapper/*.txt
+include src/dtMsalO365Wrapper/*.yaml
+include src/dtMsalO365Wrapper/**/*.yaml
