@@ -33,9 +33,9 @@ classifiers = [
 dynamic = ["dependencies", "version"]
 
 [project.urls]
-Homepage = "https://"
-Repository = "https://"
-Documentation = "https://"
+Homepage = "https://github.com/Digital-Thought/dtMsalO365Wrapper"
+Repository = "https://github.com/Digital-Thought/dtMsalO365Wrapper"
+Documentation = "https://github.com/Digital-Thought/dtMsalO365Wrapper"
 
 [tool.setuptools]
 include-package-data = true
