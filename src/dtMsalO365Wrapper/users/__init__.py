@@ -8,7 +8,7 @@ import logging
 
 class Users:
 
-    DEFAULT_SELECT_FIELDS = ['id','accountEnabled','assignedLicenses','assignedPlans','businessPhones','city','companyName','country','createdDateTime','department','displayName','givenName','jobTitle','mail','officeLocation']
+    DEFAULT_SELECT_FIELDS = ['id','userPrincipalName','accountEnabled','assignedLicenses','assignedPlans','businessPhones','city','companyName','country','createdDateTime','department','displayName','givenName','jobTitle','mail','officeLocation']
 
     """
     Manages and interacts with user-related data and functionalities.
