@@ -2,6 +2,9 @@ from office365.graph_client import GraphClient
 from office365.directory.users.user import User as Office365User
 from office365.directory.users.user import Presence
 
+from dtMsalO365Wrapper.messages import Messages
+from dtMsalO365Wrapper._token_auth_session import TokenAuthSession
+
 class User:
     """
     Represents a user in the context of a Microsoft Graph API.
@@ -19,9 +22,10 @@ class User:
     :ivar _loaded: Boolean flag indicating whether user data has been fully loaded.
     :type _loaded: bool
     """
-    def __init__(self, graph_client: GraphClient, user: Office365User):
+    def __init__(self, graph_client: GraphClient, token_auth_session: TokenAuthSession, user: Office365User):
         self._graph_client = graph_client
         self._user: Office365User = user
+        self._token_auth_session = token_auth_session
         self._loaded = False
 
     def get_loaded_user(self):
@@ -203,3 +207,6 @@ class User:
         :return: None
         """
         self._user.set_property(property_name, value).update().execute_query()
+
+    def get_message(self, message_id):
+        return Messages(self._graph_client, self._token_auth_session).get_message(self, message_id)

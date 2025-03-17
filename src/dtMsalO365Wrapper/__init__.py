@@ -9,6 +9,7 @@ from dtMsalO365Wrapper._token_auth_session import TokenAuthSession
 from dtMsalO365Wrapper.users import Users
 from dtMsalO365Wrapper.communications import Communications
 from dtMsalO365Wrapper.subscriptions import Subscriptions
+from dtMsalO365Wrapper.messages import Messages
 
 
 class MsalO365Client:
@@ -165,3 +166,6 @@ class MsalO365Client:
 
     def subscriptions(self) -> Subscriptions:
         return Subscriptions(self.graph_client, self.token_auth_session)
+
+    def messages(self) -> Messages:
+        return Messages(self.graph_client, self.token_auth_session)

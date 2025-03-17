@@ -48,7 +48,7 @@ class Users:
         """
         _users = []
         for u in self._users.filter(query_filter).get_all(100).select(select_fields).execute_query():
-            _users.append(User(self._graph_client, u))
+            _users.append(User(self._graph_client, self._token_auth_session, u))
         return _users
 
     def get_enabled_accounts(self, select_fields: list = DEFAULT_SELECT_FIELDS):
@@ -138,7 +138,7 @@ class Users:
         """
         _users = []
         for u in self._users.get_all(100).select(select_fields).execute_query():
-            _users.append( User(self._graph_client, u))
+            _users.append( User(self._graph_client, self._token_auth_session, u))
         return _users
 
     def get_top(self, top):
