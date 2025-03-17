@@ -63,7 +63,7 @@ class Communications:
             if response.ok:
                 consolidated_results.extend(response.json()['value'])  # Store successful results
             else:
-                logging.error(f"Error processing batch {i // batch_size + 1}: {response.status_code}")
+                logging.error(f"Error processing batch {i // batch_size + 1}: {response.status_code} -> {response.content}")
         for a in consolidated_results:
             for u in _users:
                 if a['id'] == u.id:
