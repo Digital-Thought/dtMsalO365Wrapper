@@ -30,6 +30,10 @@ class Users:
         self._token_auth_session = token_auth_session
         self._users: UserCollection = self._graph_client.users
 
+    def get_by_id(self, user_id):
+        u = self._graph_client.users[user_id].get().execute_query()
+        return User(self._graph_client, self._token_auth_session, u)
+
     def get(self, query_filter, select_fields: list = DEFAULT_SELECT_FIELDS):
         """
         Retrieves a list of user objects based on the provided query filter and selected fields.
