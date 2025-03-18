@@ -56,5 +56,3 @@ class Subscriptions:
         if resp.status_code != 204:
             logging.error(f'Failed to delete Subscription: {resp.content}')
             raise Exception(f'Failed to delete Subscription: {resp.content}')
-
-        return resp.json()
