@@ -12,7 +12,6 @@ class Subscriptions:
     def __init__(self, graph_client: GraphClient, token_auth_session: TokenAuthSession):
         self._graph_client = graph_client
         self._token_auth_session = token_auth_session
-        self._graph_client.subscriptions.get_all().execute_query()
         self._subscriptions = self._graph_client.subscriptions
 
     def add_subscription(self, resource: str, notification_url: str, change_type: str,
