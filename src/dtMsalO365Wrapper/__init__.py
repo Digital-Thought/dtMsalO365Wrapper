@@ -2,6 +2,7 @@ import time
 import logging
 import datetime
 import msal
+import requests
 from azure.identity import CertificateCredential
 from office365.graph_client import GraphClient
 from dtMsalO365Wrapper._token_auth_session import TokenAuthSession
@@ -10,6 +11,8 @@ from dtMsalO365Wrapper.users import Users
 from dtMsalO365Wrapper.communications import Communications
 from dtMsalO365Wrapper.subscriptions import Subscriptions
 from dtMsalO365Wrapper.messages import Messages
+from dtMsalO365Wrapper.teams import Teams
+from dtMsalO365Wrapper.power_automate import PowerAutomate
 
 
 class MsalO365Client:
@@ -47,10 +50,11 @@ class MsalO365Client:
         self._client_secret = client_secret
         self._certificate_path = certificate_path
         self._certificate_password = certificate_password
-        self._access_token = None
-        self._token_expiry = None
+        self._access_tokens = {}
+        self._token_expiry = {}
         self.graph_client = GraphClient(self._acquire_token)
-        self.token_auth_session = TokenAuthSession(self._acquire_token)
+        self.token_auth_session = TokenAuthSession(self._acquire_token, scope="https://graph.microsoft.com/.default")
+        self.power_automate_token_auth_session = TokenAuthSession(self._acquire_token, scope='https://service.flow.microsoft.com//.default')
         root_site = self.graph_client.sites.root.get().execute_query()
         logging.info(f'Successfully Authenticated: {root_site.web_url}')
 
@@ -93,7 +97,7 @@ class MsalO365Client:
         return cls(tenant_id=tenant_id, client_id=client_id, certificate_path=certificate_path,
                    certificate_password=certificate_password)
 
-    def _acquire_token(self):
+    def _acquire_token(self, scope="https://graph.microsoft.com/.default"):
         """
         Acquires and returns an access token for authentication with Microsoft Graph API. If an access
         token is already available and valid, it reuses the token; otherwise, it retrieves a new token
@@ -110,23 +114,24 @@ class MsalO365Client:
             'expires_in', 'token_type', 'ext_expires_in', and 'token_source'.
         :rtype: dict
         """
-        if self._access_token is None or datetime.datetime.now() > self._token_expiry:
+        _access_token = self._access_tokens.get(scope)
+        _token_expiry = self._token_expiry.get(scope)
+        if _access_token is None or datetime.datetime.now() > _token_expiry:
             authority_url = "https://login.microsoftonline.com/{0}".format(self._tenant_id)
-
             if self._client_secret is not None:
                 app = msal.ConfidentialClientApplication(
                     authority=authority_url,
                     client_id=self._client_id,
                     client_credential=self._client_secret,
                 )
-                self._access_token = app.acquire_token_for_client(scopes=["https://graph.microsoft.com/.default"])
+                self._access_tokens[scope] = app.acquire_token_for_client(scopes=[scope])
             else:
                 creds = CertificateCredential(tenant_id=self._tenant_id,
                                       client_id=self._client_id,
                                       certificate_path=self._certificate_path,
                                       password=self._certificate_password)
-                token = creds.get_token("https://graph.microsoft.com/.default")
-                self._access_token = {
+                token = creds.get_token(scope)
+                self._access_tokens[scope] = {
                     "access_token": token.token,
                     "expires_in": int(token.expires_on - time.time()),
                     "token_type": "Bearer",
@@ -134,9 +139,9 @@ class MsalO365Client:
                     "token_source": 'identity_provider'
                 }
 
-            self._token_expiry = datetime.datetime.now() + datetime.timedelta(seconds=self._access_token["expires_in"])
+            self._token_expiry[scope] = datetime.datetime.now() + datetime.timedelta(seconds=self._access_tokens[scope]["expires_in"])
 
-        return self._access_token
+        return self._access_tokens[scope]
 
     def users(self) -> Users:
         """
@@ -169,3 +174,9 @@ class MsalO365Client:
 
     def messages(self) -> Messages:
         return Messages(self.graph_client, self.token_auth_session)
+
+    def teams(self) -> Teams:
+        return Teams(self.graph_client, self.token_auth_session, self.power_automate())
+
+    def power_automate(self) -> PowerAutomate:
+        return PowerAutomate(self.power_automate_token_auth_session)

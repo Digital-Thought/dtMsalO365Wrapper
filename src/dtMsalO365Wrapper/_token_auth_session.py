@@ -20,10 +20,11 @@ class TokenAuthSession(requests.Session):
         URLs to construct the complete endpoint path.
     :type root_url: str
     """
-    def __init__(self, token_func, root_url='https://graph.microsoft.com/v1.0'):
+    def __init__(self, token_func, scope, root_url='https://graph.microsoft.com/v1.0'):
         super().__init__()
         self.token_func = token_func
         self.root_url = root_url
+        self.scope = scope
 
         # Configure retries for transient errors (except 429, which we handle separately)
         retries = Retry(
@@ -47,7 +48,7 @@ class TokenAuthSession(requests.Session):
         :return: The access token as a string.
         :rtype: str
         """
-        resp = self.token_func()
+        resp = self.token_func(self.scope)
         return resp['access_token']
 
     def request(self, method, url, **kwargs):
@@ -73,7 +74,10 @@ class TokenAuthSession(requests.Session):
         kwargs["headers"]["Authorization"] = f"Bearer {token}"
 
         while True:
-            response = super().request(method, f'{self.root_url}{url}', **kwargs)
+            if url.startswith('https://'):
+                response = super().request(method, f'{url}', **kwargs)
+            else:
+                response = super().request(method, f'{self.root_url}{url}', **kwargs)
 
             if response.status_code == 429:  # Handle Rate Limiting
                 retry_after = int(response.headers.get("Retry-After", 5))  # Default to 5s if not provided
