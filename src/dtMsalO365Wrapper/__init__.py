@@ -55,8 +55,8 @@ class MsalO365Client:
         self.graph_client = GraphClient(self._acquire_token)
         self.token_auth_session = TokenAuthSession(self._acquire_token, scope="https://graph.microsoft.com/.default")
         self.power_automate_token_auth_session = TokenAuthSession(self._acquire_token, scope='https://service.flow.microsoft.com//.default')
-        root_site = self.graph_client.sites.root.get().execute_query()
-        logging.info(f'Successfully Authenticated: {root_site.web_url}')
+        # root_site = self.graph_client.sites.root.get().execute_query()
+        # logging.info(f'Successfully Authenticated: {root_site.web_url}')
 
     @classmethod
     def with_client_id_secret(cls, tenant_id, client_id, client_secret):
